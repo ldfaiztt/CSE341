@@ -1,0 +1,75 @@
+Topics for Tutorial Oct 1
+
+Recursion
+
+Show append function (the built in version is ++)
+
+append [] ys = ys
+append (x:xs) ys = x : append xs ys
+
+trace this on:
+
+append [] [10,20,30]
+
+append [1] [10,20,30]
+
+append [1,2] [10,20,30]
+
+
+Write a recursive function pairs that takes a list, and returns a new list
+of pairs taken from the original list.
+
+Examples 
+pairs [1,2,3] returns [(1,1),(2,2),(3,3)]
+pairs [True] returns [(True,True)]
+pairs "squid" returns ["ss","qq","uu","ii","dd"]
+
+pairs [] = []
+pairs (x:xs) = (x,x) : pairs xs
+
+What is its type?
+
+Write a nonrecursive version using map
+
+pairs = map (\x -> (x,x)) 
+
+Write a recursive function zip that takes two lists and returns a list of
+pairs of elements from the corresponding lists.  First assume the lists are
+of equal lengths.
+
+zip [] [] = []
+zip (x:xs) (y:ys) = (x,y) : zip xs ys
+
+Now make this more robust.  If the lists are of unequal lengths, just
+return pairs until the shorter list is exhausted.
+
+zip [] [] = []
+zip (x:xs) [] = []
+zip [] (y:ys) = []
+zip (x:xs) (y:ys) = (x,y) : zip xs ys
+
+Here's another version, using _ for don't care variables:
+
+zip [] _ = []
+zip _ [] = []
+zip (x:xs) (y:ys) = (x,y) : zip xs ys
+
+Write your own version of the 'take' function:
+
+mytake _ [] = []
+mytake n (x:xs) = if n>0
+                  then x : mytake (n-1) xs
+                         else []
+
+write map2 (as in the mini-exercises):
+
+map2 f [] [] = []
+map2 f (x:xs) (y:ys) = f x y : map2 xs ys
+
+or perhaps better (works with lists of different lengths):
+
+map2 f [] _ = []
+map2 f _ [] = []
+map2 f (x:xs) (y:ys) = f x y : map2 xs ys
+
+trace this on map2 (+) [1,2] [10,11]

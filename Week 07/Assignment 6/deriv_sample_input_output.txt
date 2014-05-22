@@ -1,0 +1,40 @@
+Prolog Deriv Sample Input/Output
+
+1 ?- deriv(3,x,Y).
+Y = 0.
+
+2 ?- deriv(sin(x), x, Y).
+Y = cos(x).
+
+3 ?- deriv(cos(x), x, Y).
+Y = 0-sin(x).
+
+4 ?- deriv(0-x, x, Y).
+Y = -1.
+
+5 ?- deriv(0-x^2,x,Y).
+Y = 0-2*x.
+
+6 ?- deriv(xsin(4*10), x, Y).
+false.
+
+7 ?- deriv(x*sin(4*10), x, Y).
+Y = 0.7451131604793488.
+
+8 ?- deriv(x^2*sin(4*10), x, Y).
+Y = 2*x*0.7451131604793488.
+
+9 ?- deriv(x^3*sin(4*x), x, Y).
+Y = x^3* (cos(4*x)*4)+3*x^2*sin(4*x).
+
+11 ?- deriv(x^0,x,Y).
+Y = 0.
+
+12 ?- deriv(x^3*cos(4*x), x, Y).
+Y = x^3* (0-sin(4*x)*4)+3*x^2*cos(4*x).
+
+13 ?- deriv(y, x, Y).
+Y = 0.
+
+14 ?- deriv((x^3-4)^32, x, Y).
+Y = 32* (x^3-4)^31* (3*x^2).

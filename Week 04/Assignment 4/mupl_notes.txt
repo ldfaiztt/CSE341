@@ -1,0 +1,128 @@
+Sean Wu
+
+Notes and tips about MUPL From Section
+
+//A bunch of examples
+
+An "environment" in Java:
+int x = 5;
+int y = 10;
+int z = 23;
+
+Analogue of the "environment" in MUPL:
+(list (cons "x" (int 5)) (cons "y" (int 10)) (cons "z" (int 23)))
+
+So the environment is just all the defined bindings up to that point in the MUPL expression. It's always a Racket list of cons cells where the name is a racket string and value is a MUPL expression.
+
+mlet* example:
+input: (mlet* (list (cons "x" (int 10)) (cons "y" (int 20))) (add (var "x") (var "y")))
+output: (mlet "x" (int 10) (mlet "y" (int 20) (add (var "x") (var "y"))))
+
+Example of using an environment:
+input: (eval-in-env  (list (cons "x" (int 10)) (cons "y" (int 20))) (add (var "x") (var "y")))
+output: (int 30)
+
+Example of mupl-map in action:
+Input:(eval-prog (call (call mupl-map (fun "double" "x" (add (var "x") (var "x")))) (racketlist->mupllist (list (int 1) (int 2) (int 3) (int 4)))))
+output: (apair (int 2) (apair (int 4) (apair (int 6) (apair (int 8) (aunit)))))
+
+A closure of the "double" function:
+(closure '() (fun "double" "x" (add (var "x") (var "x"))))
+
+What call does:
+input: 
+	(eval-prog (call (closure '() (fun "double" "x" (add (var "x") (var "x")))) (int 10)))
+Equivalent expression:
+	(eval-in-env  (list (cons "x" (int 10)) (cons "double" (closure '() (fun "double" "x" (add (var "x") (var "x")))))) (add (var "x") (var "x")))
+output: (int 20)
+
+//End of examples
+
+//E-mail Excerpts with examples
+
+//#1
+
+So the environment is just all the defined bindings up to that point in the MUPL expression. It's always a Racket list of cons cells from what I remember
+where the name is a racket string and value is a MUPL expression.
+So given this MUPL expression.
+
+(mlet "x" (int 10) (mlet "y" (int 20) (add (var "x") (var "y"))))
+When evaluating (add (var "x") (var "y")), you'll have an environment something like this.
+
+(list (cons "x" (int 10)) (cons "y" (int 20)))
+
+input: (eval-prog (call (closure '() (fun "double" "x" (add (var "x") (var "x")))) (int 10)))
+output : (int 20)
+
+That's your environment because the mlets have made these bindings.
+
+Here's an example of the environment in action 
+
+input: (eval-in-env  (list (cons "x" (int 10)) (cons "y" (int 20))) (add (var "x") (var "y")))
+output: (int 30)
+
+This is what the mlets evaluate to. The list of cons cells is your environment and then it uses these binding of "x"->(int 10) and "y"->(int 20) to replace
+(var "x") and (var "y") before adding them. 
+
+I'll try a Java analogy.
+
+So in Java you can do things like 
+int x = 5;
+int y = 10;
+int z = 23;
+int a = x + y + z
+
+In this case, a is evaluated in an environment such that x, y, and z are defined. Because they are defined, a can be evaluated and bound. 
+Though it's not a perfect analogy since partially evaluated functions in Java don't exist (maybe they do? Never tried it before), but in this case your 
+environment in a MUPL expression might look like this
+
+(list (cons "x" (int 5)) (cons "y" (int 10)) (cons "z" (int 23)))
+
+and the MUPL expression you're evaluation might look something like this?
+
+(add (add (var "x") (var "y")) (var "z"))
+
+You can throw those into eval-in-env and it should evaluate to (int 38)
+
+Hope that helps with your understanding of the environment! It just contains all the bindings known to environment at that point in the program.
+Feel free to ask anymore questions you want! I'll probably try to go over MUPL in section tomorrow to catch as many questions as come up.
+
+//#2
+
+input: (eval-prog (call (call mupl-map (fun "double" "x" (add (var "x") (var "x")))) (racketlist->mupllist (list (int 1) (int 2) (int 3) (int 4)))))
+output: (apair (int 2) (apair (int 4) (apair (int 6) (apair (int 8) (aunit)))))
+
+So here's what closures look like:
+(closure (env fun) ) 
+where env is the closure's environment
+where fun is
+(fun (nameopt formal body))
+
+So here's how call works
+Closure environments contain the entire environment up to that point along with the argument to the function
+bound to what the "formal" is. So its environment will gain something like (cons "x" (int 10)) more than the
+overall environment. So now we've established this new environment with a new binding. 
+
+Next we want to evaluate fun-body with this new environment. BUT we also want the overall environment
+to gain a binding for the name of the function with the closure like ("function something" (closure ...)).
+This is to deal with var in the MUPL expression that may come up with the name of the function. Like (var "double") will get
+replaced by a closure of that type, so you can call it on the argument.
+
+Kind of convoluted unfortunately.
+
+Here's an example of a closure
+(closure '() (fun "double" "x" (add (var "x") (var "x"))))
+
+And he's an example of what call is like
+
+input: (eval-prog (call (closure '() (fun "double" "x" (add (var "x") (var "x")))) (int 10)))
+output : (int 20)
+
+So call should do something like this. 
+
+(eval-in-env  (list (cons "x" (int 10)) (cons "double" (closure '() (fun "double" "x" (add (var "x") (var "x")))))) (add (var "x") (var "x")))
+
+That's what MUPL will do to that call. 
+Pulls the argument and (function name-closure) pair  into the environment and evaluates the function body using that.
+
+Hope that helps and feel free to ask any more questions!
